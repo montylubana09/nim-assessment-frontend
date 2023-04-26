@@ -20,7 +20,7 @@ function OrderModal({ order, setOrderModal }) {
       })
     });
     const data = await response.json();
-    console.log(data);
+    setOrderModal(data);
   };
   return (
     <>
