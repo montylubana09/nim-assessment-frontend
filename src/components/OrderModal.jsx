@@ -6,8 +6,35 @@ function OrderModal({ order, setOrderModal }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [errors, setErrors] = useState([]);
   const navigate = useNavigate();
   const placeOrder = async () => {
+    const validationErrors = [];
+    if (!name) {
+      validationErrors.push({ field: "name", message: "Name is required *" });
+    }
+    if (!phone) {
+      validationErrors.push({ field: "phone", message: "Phone is required *" });
+    } else if (!/^\d{3}-?\d{3}-?\d{4}$/.test(phone)) {
+      validationErrors.push({ field: "phone", message: "Phone is Invalid *" });
+    }
+
+    if (!address) {
+      validationErrors.push({
+        field: "address",
+        message: "address is required *"
+      });
+    }
+
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    const formattedPhoneNumber = phone.replace(
+      /(\d{3})(\d{3})(\d{4})/,
+      "($1) $2-$3"
+    );
     const response = await fetch("/api/orders", {
       method: "POST",
       headers: {
@@ -15,11 +42,12 @@ function OrderModal({ order, setOrderModal }) {
       },
       body: JSON.stringify({
         name,
-        phone,
+        phone: formattedPhoneNumber,
         address,
         items: order
       })
     });
+
     const data = await response.json();
     if (response.status === 200) {
       navigate(`/order-confirmation/${data.id}`);
@@ -45,6 +73,11 @@ function OrderModal({ order, setOrderModal }) {
           <div className={styles.formGroup}>
             <label htmlFor="name">
               Name
+              {errors.find((error) => error.field === "name") && (
+                <div className={styles.errorMessage}>
+                  {errors.find((error) => error.field === "name")?.message}
+                </div>
+              )}
               <input
                 onChange={(e) => {
                   e.preventDefault();
@@ -58,6 +91,11 @@ function OrderModal({ order, setOrderModal }) {
           <div className={styles.formGroup}>
             <label htmlFor="phone">
               Phone
+              {errors.find((error) => error.field === "phone") && (
+                <div className={styles.errorMessage}>
+                  {errors.find((error) => error.field === "phone").message}
+                </div>
+              )}
               <input
                 onChange={(e) => {
                   e.preventDefault();
@@ -71,6 +109,11 @@ function OrderModal({ order, setOrderModal }) {
           <div className={styles.formGroup}>
             <label htmlFor="address">
               Address
+              {errors.find((error) => error.field === "address") && (
+                <div className={styles.errorMessage}>
+                  {errors.find((error) => error.field === "address").message}
+                </div>
+              )}
               <input
                 onChange={(e) => {
                   e.preventDefault();
@@ -90,6 +133,13 @@ function OrderModal({ order, setOrderModal }) {
           >
             Close
           </button>
+          {/* {errors.length > 0 && (
+            <div className={styles.errorMessage}>
+              {errors.map((error) => (
+                <p key={error}>{error}</p>
+              ))}
+            </div>
+          )} */}
           <button
             onClick={() => {
               placeOrder();
