@@ -63,3 +63,8 @@
   background-color: var(--secondary-accent);
   color: var(--secondary-color);
 }
+
+.errorMessage {
+  color: red;
+  font-weight: bold;
+}
